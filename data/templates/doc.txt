@@ -1,3 +1,0 @@
-# Titulo {}
-## Subtitulo {}
-Aquí tenemos el siguiente contenido: {}
