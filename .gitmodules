@@ -1,5 +1,3 @@
 [submodule "lib/octokitpy"]
 	path = lib/octokitpy
 	url = https://github.com/husseinamine/octokitpy.git
-
-/src/auth/token.txt
