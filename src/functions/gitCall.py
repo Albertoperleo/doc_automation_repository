@@ -1,8 +1,8 @@
-from octokitpy.octokit import Octokit
+from lib.octokitpy.octokit import Octokit
 import json
 
 # Api-Key Configuration
-token = open(r".\token.txt", "r")
+token = open(r"..\auth\token.txt", "r")
 api_key = token.read()
 token.close()
 octokit = Octokit(api_key)
