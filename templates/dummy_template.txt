@@ -1,0 +1,7 @@
+# Presentation card:
+- Name: {name}
+- Surname: {surname}
+- Tlf: {tlf}
+- Birthday: {bday}
+
+
