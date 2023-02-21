@@ -1,2 +1,5 @@
-autodoc\token.txt
-templates\*
+.\autodoc\token.txt
+.\templates\md
+.\templates\md\*
+.\templates\group_analysis_report_template.txt
+.\templates\group_planning_report_template.txt
