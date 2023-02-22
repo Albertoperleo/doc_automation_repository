@@ -3,3 +3,8 @@
 .\templates\md\*
 .\templates\group_analysis_report_template.txt
 .\templates\group_planning_report_template.txt
+.\data
+.\data\*
+.\autodoc\__pycache__
+.\autodoc\models\__pycache__
+.\env

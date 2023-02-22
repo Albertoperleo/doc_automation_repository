@@ -75,3 +75,11 @@ def get_contributors(url: str, octokit: Octokit) -> List[Contributor]:
     """
     contributors_json= api_github(url, octokit)
     return Contributor.createContributors(contributors_json)
+
+    """TODO
+    Def retrieve commits function
+    """
+    
+    """TODO
+    Def retrieve issues function
+    """
