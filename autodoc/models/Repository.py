@@ -19,12 +19,11 @@ class Repository:
                  contributors: List[Contributor],
                  events: str,
                  assignees: str,
-                 statuses: List[str],
                  commits: List[Commit],
                  issues: List[Issue],
                  open_issues: int,
                  created_at: str,
-                 languages: List[str],
+                 language: List[str],
                  has_projects: bool) -> None:
         self.id = repo_id
         self.name = name
@@ -37,12 +36,11 @@ class Repository:
         self.contributors = contributors
         self.events = events
         self.assignees = assignees
-        self.statuses = statuses
         self.commits = commits
         self.issues = issues
         self.open_issues = open_issues
         self.created_at = created_at
-        self.languages = languages
+        self.language = language
         self.has_projects = has_projects
         
     @staticmethod
@@ -52,14 +50,14 @@ class Repository:
         full_name = repository_json['full_name']
         description = repository_json['description']
         html_url = repository_json['html_url']
-        api_url = repository_json['api_url']
+        api_url = repository_json['url']
         private = repository_json['private'] == 'true'
-        events = repository_json['events']
-        assignees = repository_json['assignees']
+        events = repository_json['events_url']
+        assignees = repository_json['assignees_url']
         open_issues = int(repository_json['open_issues'])
         created_at = repository_json['created_at']
-        languages = repository_json['languages']
-        has_projects = repository_json['has_projects']
+        language = [repository_json['language']]
+        has_projects = repository_json['has_projects'] == 'true'
         
         return Repository(repo_id, 
                           name, 
@@ -76,12 +74,13 @@ class Repository:
                           None,
                           open_issues,
                           created_at,
-                          languages,
+                          language,
                           has_projects)
         
     def __str__(self) -> str:
-        title = 'REPOSITORY INFORMATION'
-        details = 'Name: {0}\nCreated at: {1}\nLanguage: {2}\nDescription: {3}\nOpen issues: {4}'.format(
-            self.name, self.created_at, self.language, self.description, self.open_issues
+        separator = '#'*60
+        title = '\t\tREPOSITORY INFORMATION'
+        details = 'Name: {0}\nCreated at: {1}\nLanguage: {2}\nDescription: {3}\nOpen issues: {4}\nContributors: {5}'.format(
+            self.name, self.created_at, self.language, self.description, self.open_issues, list(map(lambda c: c.nickname,self.contributors))
         )
-        return '{}\n{}'.format(title, details)
+        return f"{separator}\n{title}\n{separator}\n{details}"

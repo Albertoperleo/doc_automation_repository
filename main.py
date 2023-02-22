@@ -24,13 +24,13 @@ def create_directories() -> str:
 
 def main():
     repository_url = input('Enter the repository URL:\n')
-    path = create_directories()
+    data_path = create_directories()
     # Api-Key Configuration
     with open(r".\autodoc\token.txt", "r") as token_file:
         api_key = token_file.read()
     try:
         octokit = Octokit(api_key)
-        repository = get_repository(repository_url, octokit)
+        repository = get_repository(octokit, repository_url)
     except (ValueError, ConnectionError) as error:
         print(error)
     input('Press Enter to exit...')
