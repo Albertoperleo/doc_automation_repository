@@ -7,4 +7,5 @@
 .\data\*
 .\autodoc\__pycache__
 .\autodoc\models\__pycache__
-.\env
+.\env\
+.\vscode\
