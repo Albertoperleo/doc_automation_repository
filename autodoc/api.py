@@ -15,21 +15,30 @@ def api_github(url: str, octokit: Octokit) -> List[T]:
     Returns:
         json[T]: json formed data
     """
-    data = octokit.request(url,{})
+    endpoint = parse_url(url, "GET")
+    data = octokit.request(endpoint, {  
+        "headers": {
+            "accept": "application/vnd.github+json"
+        }
+    })
+    
     data_dump = json.dumps(data, indent=4)
     data_json = json.loads(data_dump)
     return data_json
 
-def parse_url(url: str) -> str:
+def parse_url(url: str, method: str) -> str:
     """Parses the url to the api endpoint
 
     Args:
         url (str): initial url
+        method (str): request method
 
     Returns:
         str: endpoint
     """
-    return url.replace("https://api.github.com", "GET ")
+    dotcom_index = url.rfind('.com')
+    url_modified = url[dotcom_index + 4:]
+    return f"{method} {url_modified}"
     
 
 '''

@@ -28,8 +28,8 @@ def main():
     # Api-Key Configuration
     with open(r".\autodoc\token.txt", "r") as token_file:
         api_key = token_file.read()
-    octokit = Octokit(api_key)
     try:
+        octokit = Octokit(api_key)
         repository = get_repository(repository_url, octokit)
     except (ValueError, ConnectionError) as error:
         print(error)
