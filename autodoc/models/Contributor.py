@@ -32,5 +32,5 @@ class Contributor:
                                    contributions)
         
         @staticmethod
-        def createContributors(contributors_json: json) -> List[Contributor]:
+        def create_contributors(contributors_json: json) -> List[Contributor]:
                 return [Contributor.create(c) for c in contributors_json]

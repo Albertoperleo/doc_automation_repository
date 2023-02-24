@@ -24,5 +24,5 @@ class Commit:
         return Commit(sha, author, date, message)
     
     @staticmethod
-    def createCommits(commits_json: json) -> List[Commit]:
+    def create_commits(commits_json: json) -> List[Commit]:
         return [Commit.create(c) for c in commits_json]

@@ -31,6 +31,7 @@ def main():
     try:
         octokit = Octokit(api_key)
         repository = get_repository(octokit, repository_url)
+        print(f"\n{repository}\n")
     except (ValueError, ConnectionError) as error:
         print(error)
     input('Press Enter to exit...')

@@ -26,8 +26,8 @@ def parse_url(url: str, front_path: str, back_path: str) -> str:
     that we have an optional path we have to control.
     
     Attention:
-        - front_path and back_path: you must add the '/' inside the path. For example:
-            - front_path: 'git/'
+        - front_path and back_path: you must add the left '/' inside the path. For example:
+            - front_path: '/git'
             - back_path: '/git'
 
     Args:
@@ -39,7 +39,7 @@ def parse_url(url: str, front_path: str, back_path: str) -> str:
         str: endpoint
     """
     initial_index = url.rfind("github.com")
-    final_index = url.rfind("{") if "{" in url else -1
+    final_index = url.rfind("{") if "{" in url else None
     basic_url = url[initial_index + 10 : final_index]
     return f"GET {front_path}{basic_url}{back_path}"
     
@@ -71,7 +71,6 @@ def get_repository(octokit: Octokit, url: str) -> Repository:
     issues_url = repository_json['issues_url']
     repository.issues = get_issues(octokit, issues_url)
     
-    print(repository)
     return repository
     
 def get_contributors(octokit: Octokit, url: str) -> List[Contributor]:
@@ -85,7 +84,7 @@ def get_contributors(octokit: Octokit, url: str) -> List[Contributor]:
         List[Contributor]: repository's contributors list
     """
     contributors_json = api_github(octokit, url, front_path='', back_path='')
-    return Contributor.createContributors(contributors_json)
+    return Contributor.create_contributors(contributors_json)
     
 def get_commits(octokit: Octokit, url: str) -> List[Commit]:
     """Creates the repository's commits list
@@ -98,7 +97,7 @@ def get_commits(octokit: Octokit, url: str) -> List[Commit]:
         List[Commit]: commits list
     """
     commits_json = api_github(octokit, url, front_path='', back_path='')
-    return Commit.createCommits(commits_json)
+    return Commit.create_commits(commits_json)
     
 def get_issues(octokit: Octokit, url: str) -> List[Commit]:
     """Creates the repository's issues list
@@ -111,3 +110,4 @@ def get_issues(octokit: Octokit, url: str) -> List[Commit]:
         List[Commit]: issues list
     """
     issues_json = api_github(octokit, url, front_path='', back_path='')
+    return Issue.create_issues(issues_json)
