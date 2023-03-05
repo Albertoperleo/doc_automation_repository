@@ -1,10 +1,10 @@
 ./autodoc/token.txt
-./templates/md
-./templates/md/**
-./templates/group_analysis_report_template.txt
-./templates/group_planning_report_template.txt
-./data/**
 ./autodoc/__pycache__
 ./autodoc/models/__pycache__
+
+./templates/**
+!./templates/dummy_template.txt
+
+./data/**
 ./.env/**
 ./.vscode/**

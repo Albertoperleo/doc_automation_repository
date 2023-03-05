@@ -11,7 +11,7 @@ class Repository:
                  repo_id: str, 
                  name: str, 
                  full_name: str, 
-                 owner: Contributor,
+                 owner: str,
                  description: str, 
                  private: bool, 
                  html_url: str, 
@@ -48,6 +48,7 @@ class Repository:
         repo_id = repository_json['id']
         name = repository_json['name']
         full_name = repository_json['full_name']
+        owner = repository_json['owner']['login']
         description = repository_json['description']
         html_url = repository_json['html_url']
         api_url = repository_json['url']
@@ -62,7 +63,7 @@ class Repository:
         return Repository(repo_id, 
                           name, 
                           full_name,
-                          None,
+                          owner,
                           description,
                           private,
                           html_url, 

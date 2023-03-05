@@ -34,3 +34,6 @@ class Contributor:
         @staticmethod
         def create_contributors(contributors_json: json) -> List[Contributor]:
                 return [Contributor.create(c) for c in contributors_json]
+        
+        def __str__(self) -> str:
+                return self.nickname

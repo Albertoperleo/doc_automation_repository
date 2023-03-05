@@ -2,9 +2,10 @@ from __future__ import annotations
 from typing import List
 import json
 
+
 class Issue:
-    def __init__(self, 
-                 number: int,  
+    def __init__(self,
+                 number: int,
                  user: str,
                  title: str,
                  body: str,
@@ -24,8 +25,7 @@ class Issue:
         self.created_at = created_at
         self.updated_at = updated_at
         self.closed_at = closed_at
-        
-        
+
     @staticmethod
     def create(issue_json: json) -> Issue:
         number = issue_json['number']
@@ -48,7 +48,7 @@ class Issue:
                      created_at,
                      updated_at,
                      closed_at)
-        
+
     @staticmethod
     def create_issues(issues_json: json) -> List[Issue]:
         return [Issue.create(i) for i in issues_json]

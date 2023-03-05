@@ -1,3 +1,3 @@
-from .api import *
-from .markdown_generator import *
-from .models import *
+from autodoc.api import *
+from autodoc.markdown_generator import *
+from autodoc.models import *
