@@ -1,5 +1,8 @@
 from typing import List, TypeVar, Dict
 from octokit import Octokit
+
+from autodoc.models.Report import Report
+from clockipy import Clockipy
 from autodoc.models import *
 
 A = TypeVar('A')
@@ -44,10 +47,15 @@ def parse_url(url: str, front_path: str, back_path: str) -> str:
     Returns:
         str: endpoint
     """
-    initial_index = url.rfind("github.com")
-    final_index = url.rfind("{") if "{" in url else None
-    basic_url = url[initial_index + 10: final_index]
-    return f"GET {front_path}{basic_url}{back_path}"
+    if "github.com" in url:
+        initial_index = url.rfind("github.com") + len("github.com")
+        final_index = url.rfind("{") if "{" in url else None
+        basic_url = url[initial_index: final_index]
+        return f"GET {front_path}{basic_url}{back_path}"
+    if "clockify.me" in url:
+        initial_index = url.rfind("api.clockify.me/api/v1") + len("api.clockify.me/api/v1")
+        basic_url = url[initial_index:]
+        return f"GET {front_path}{basic_url}"
 
 
 '''
@@ -125,3 +133,19 @@ def get_issues(octokit: Octokit, url: str) -> List[Issue]:
 '''
 Here is the code in charge of retrieve data from clockify
 '''
+
+
+def get_clockify(clockipy: Clockipy, clockify_url: str, clockify_ws: str) -> Report:
+    """Creates the clockify object retrieving all the data from Clokify
+
+    Args:
+        clockipy: lib to retrieve data
+        clockify_url: api endpoint
+
+    Returns:
+        clokifyInfo
+    """
+    workspaces = api_call(clockipy, clockify_url, CLOCKIFY_API_HEADERS, front_path='', back_path='')
+    selected_ws = list(filter(lambda ws: clockify_ws in ws['name'], workspaces))[0]
+    contributors = list(map(lambda ws_member: ws_member['userId'], selected_ws['memberships']))
+    print(contributors)

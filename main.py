@@ -24,23 +24,27 @@ def create_directories() -> str:
 
 
 def main():
-    repository_url = input('Enter the repository URL:\n')
-    # clockify_url = input('Enter the clockify URL:\n')
+    #repository_url = input('Enter the repository URL:\n')
+    clockipy_ws = input("Enter the clockify's workspace name:\n")
+    clockify_url = 'https://api.clockify.me/api/v1/workspaces/'
     data_path = create_directories()
     # Api-Key Configuration
     with open(r".\autodoc\token.txt", "r") as token_file:
         line = token_file.readline()
         api_keys = line.split(";")
     try:
-        octokit = Octokit(api_keys[0])
+     #   octokit = Octokit(api_keys[0])
         clockipy = Clockipy(api_keys[1])
 
-        repository = get_repository(octokit, repository_url)
-        # clockInfo = get_clockify(clockipy, clockify_url)
+        # repository = get_repository(octokit, repository_url)
+        # print(repository)
 
-        templates_path = os.getcwd() + '/templates/'
-        template_name = 'repository_test_template.txt'
-        to_markdown(repository, templates_path, template_name)
+        clockInfo = get_clockify(clockipy, clockify_url, clockipy_ws)
+        # print(clockInfo)
+
+        #templates_path = os.getcwd() + '/templates/'
+        #template_name = 'repository_test_template.txt'
+        #to_markdown(repository, templates_path, template_name)
 
     except (ValueError, ConnectionError) as error:
         print(error)
