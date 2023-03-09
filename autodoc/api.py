@@ -1,79 +1,93 @@
-from typing import List, TypeVar, Dict
+import json
+from typing import List, TypeVar, Tuple
 from octokit import Octokit
 
 from autodoc.models.Report import Report
 from clockipy import Clockipy
 from autodoc.models import *
 
-A = TypeVar('A')
+import difflib
+
 T = TypeVar('T')
 GITHUB_API_HEADERS = {"accept": "application/vnd.github+json"}
-CLOCKIFY_API_HEADERS = {}
+DEFAULT_URL_OPTIONS = {"front_path": "", "back_path": ""}
+REPORT_BASE_URL = "https://reports.api.clockify.me/v1"
+DETAILED_FILTER = {"page": 1, "pageSize": 50}
+CLOCKIFY_API_REPORTS_BODY = {
+    "dateRangeStart": "2023-02-18T00:00:00.000",
+    "dateRangeEnd": "2023-03-17T00:00:00.000",
+    "detailedFilter": DETAILED_FILTER,
+    "exportType": "JSON"
+}
 
 
-def api_call(api_interface: A, url: str, header: dict = Dict, front_path: str = '', back_path: str = '') -> List[T]:
-    """Retrieve data from GitHub
-
-    Args:
-        header (dict):
-        url (str): link to data
-        api_interface (A): interface to retrieve data where A = {Octokitpy, Clockipy}
-        front_path (str): front path to retrieve
-        back_path (str): back path to retrieve
-
-    Returns:
-        List[T]: json formed data
+def api_call(api_interface, url: str, req_options: dict, url_options: dict) -> List[T]:
     """
-    endpoint = parse_url(url, front_path, back_path)
-    data = api_interface.request(endpoint, header)
+    This function is used to make API calls to the GitHub and Clockify APIs.
+
+    Parameters
+    ----------
+    api_interface :
+        The API interface to use.
+    url : str
+        The URL to use.
+    req_options : dict
+        The request options to use.
+    url_options : dict
+        The URL options to use.
+
+    Returns
+    -------
+    List[T]
+        The data returned by the API call.
+    """
+    keyword = "github.com" if type(api_interface) == Octokit else "api.clockify.me/api/v1"
+    endpoint = parse_url(keyword, url, url_options)
+    data = api_interface.request(endpoint, req_options)
     data_dump = json.dumps(data, indent=4)
     return json.loads(data_dump)
 
 
-def parse_url(url: str, front_path: str, back_path: str) -> str:
-    """Parses the url to the api endpoint. If it contains curved braces '{}' means
-    that we have an optional path we have to control.
-    
-    Attention:
-        - front_path and back_path: you must add the left '/' inside the path. For example:
-            - front_path: '/git'
-            - back_path: '/git'
-
-    Args:
-        url (str): initial url
-        front_path (str): front path to retrieve
-        back_path (str): back path to retrieve
-
-    Returns:
-        str: endpoint
+def parse_url(keyword: str, url: str, options: dict) -> str:
     """
-    if "github.com" in url:
-        initial_index = url.rfind("github.com") + len("github.com")
-        final_index = url.rfind("{") if "{" in url else None
-        basic_url = url[initial_index: final_index]
-        return f"GET {front_path}{basic_url}{back_path}"
-    if "clockify.me" in url:
-        initial_index = url.rfind("api.clockify.me/api/v1") + len("api.clockify.me/api/v1")
-        basic_url = url[initial_index:]
-        return f"GET {front_path}{basic_url}"
+    Parses the URL and returns the basic URL.
+
+    Parameters
+    ----------
+    keyword : str
+        The keyword to be searched in the URL.
+    url : str
+        The URL to be parsed.
+    options : dict
+        The options to be used for parsing the URL.
+
+    Returns
+    -------
+    str
+        The basic URL.
+    """
+    initial_index = url.rfind(keyword) + len(keyword)
+    final_index = url.rfind("{") if "{" in url else None
+    basic_url = url[initial_index: final_index]
+    method = "POST" if options.get("report") else "GET"
+    return f"{method} {options.get('front_path')}{basic_url}{options.get('back_path')}"
 
 
-'''
+"""
 Here is the code in charge of retrieve data from the source repository
-'''
+"""
 
 
 def get_repository(octokit: Octokit, url: str) -> Repository:
-    """Creates the repository retrieving all the data from GitHub
-
-    Args:
-        octokit (Octokit): lib to retrieve data
-        url (str): link to GitHub api
-
-    Returns:
-        Repository: repository retrieved
     """
-    repository_json = api_call(octokit, url, GITHUB_API_HEADERS, front_path='/repos', back_path='')
+    Get a repository from the given url.
+
+    :param octokit: The Octokit object.
+    :param url: The url of the repository.
+    :return: The repository.
+    """
+    url_options = {"front_path": "/repos", "back_path": ""}
+    repository_json = api_call(octokit, url, GITHUB_API_HEADERS, url_options)
     repository = Repository.create(repository_json)
 
     contributors_url = repository_json['contributors_url']
@@ -89,63 +103,122 @@ def get_repository(octokit: Octokit, url: str) -> Repository:
 
 
 def get_contributors(octokit: Octokit, url: str) -> List[Contributor]:
-    """Creates the repository's contributors list
-
-    Args:
-        url (str): link to contributors
-        octokit (Octokit): lib to retrieve data
-
-    Returns:
-        List[Contributor]: repository's contributors list
     """
-    contributors_json = api_call(octokit, url, GITHUB_API_HEADERS, front_path='', back_path='')
+    Get the contributors of a repository.
+
+    :param octokit: The Octokit object.
+    :param url: The URL of the repository.
+    :return: A list of Contributor objects.
+    """
+    contributors_json = api_call(octokit, url, GITHUB_API_HEADERS, DEFAULT_URL_OPTIONS)
     return Contributor.create_contributors(contributors_json)
 
 
 def get_commits(octokit: Octokit, url: str) -> List[Commit]:
-    """Creates the repository's commits list
-
-    Args:
-        octokit (Octokit): lib to retrieve data
-        url (str): link to commits
-
-    Returns:
-        List[Commit]: commits list
     """
-    commits_json = api_call(octokit, url, GITHUB_API_HEADERS, front_path='', back_path='')
+    Get the commits from the given url.
+
+    :param octokit: The Octokit object.
+    :param url: The url to get the commits from.
+    :return: The commits from the given url.
+    """
+    commits_json = api_call(octokit, url, GITHUB_API_HEADERS, DEFAULT_URL_OPTIONS)
     return Commit.create_commits(commits_json)
 
 
 def get_issues(octokit: Octokit, url: str) -> List[Issue]:
-    """Creates the repository's issues list
-
-    Args:
-        octokit (Octokit): lib to retrieve data
-        url (str): link to issues
-
-    Returns:
-        List[Commit]: issues list
     """
-    issues_json = api_call(octokit, url, GITHUB_API_HEADERS, front_path='', back_path='')
+    Get the issues from the given URL.
+
+    :param octokit: The Octokit object.
+    :param url: The URL to get the issues from.
+    :return: The list of issues.
+    """
+    issues_json = api_call(octokit, url, GITHUB_API_HEADERS, DEFAULT_URL_OPTIONS)
     return Issue.create_issues(issues_json)
 
 
-'''
+"""
 Here is the code in charge of retrieve data from clockify
-'''
+"""
 
 
-def get_clockify(clockipy: Clockipy, clockify_url: str, clockify_ws: str) -> Report:
-    """Creates the clockify object retrieving all the data from Clokify
-
-    Args:
-        clockipy: lib to retrieve data
-        clockify_url: api endpoint
-
-    Returns:
-        clokifyInfo
+def get_clockify(clockipy: Clockipy, clockify_url: str, clockify_ws: str, repository: Repository) -> Report:
     """
-    workspaces = api_call(clockipy, clockify_url, CLOCKIFY_API_HEADERS, front_path='', back_path='')
+    Get the Clockify report for the given repository.
+
+    :param clockipy: The Clockify API client.
+    :param clockify_url: The Clockify API URL.
+    :param clockify_ws: The Clockify workspace name.
+    :param repository: The repository to get the report for.
+    :return: The Clockify report.
+    """
+    workspaces = api_call(clockipy, clockify_url, {}, DEFAULT_URL_OPTIONS)
     selected_ws = list(filter(lambda ws: clockify_ws in ws['name'], workspaces))[0]
-    contributors = list(map(lambda ws_member: ws_member['userId'], selected_ws['memberships']))
-    print(contributors)
+
+    url_options = DEFAULT_URL_OPTIONS.copy()
+    url_options["back_path"] = f"/{selected_ws['id']}/users"
+    members = api_call(clockipy, clockify_url, {}, url_options)
+    for ws_member in members:
+        associate_member(ws_member, repository.contributors)
+
+    url_options["back_path"] = f"/{selected_ws['id']}/reports/detailed"
+    url_options["report"] = True
+    req_options = {
+        "base_url": REPORT_BASE_URL,
+        "body": CLOCKIFY_API_REPORTS_BODY
+    }
+    detail_report = api_call(clockipy, clockify_url, req_options, url_options)
+
+    time_entries = detail_report['timeentries']
+    parsed_detail_report = {}
+    for entry in time_entries:
+        user_name = entry['userName']
+        description = entry['description']
+        duration = entry['timeInterval']['duration']
+        if user_name in parsed_detail_report:
+            parsed_detail_report[user_name].append((description, duration))
+        else:
+            parsed_detail_report[user_name] = [(description, duration)]
+
+    for user, entries in parsed_detail_report.items():
+        parsed_detail_report[user] = append_durations(entries)
+
+    return parsed_detail_report
+
+
+def associate_member(member: json, contributors: List[Contributor]) -> None:
+    """
+    Associate a Clockify member with a Contributor.
+
+    :param member: A Clockify member.
+    :param contributors: A list of Contributors.
+    :return: None.
+    """
+    for contributor in contributors:
+        if difflib.SequenceMatcher(None, member['name'], contributor.nickname).ratio() > 0.5:
+            contributor.clockify_id = member['id']
+
+
+def append_durations(entries: List[Tuple[str, float]]) -> List[Tuple[str, float]]:
+    """
+    Append durations for each description.
+
+    :param entries: A list of entries.
+    :type entries: List[Tuple[str, float]]
+    :return: A list of tuples of description and total duration.
+    :rtype: List[Tuple[str, float]]
+    """
+    duration_per_description = {}
+    for entry in entries:
+        description = entry[0]
+        duration = entry[1]
+        if description in duration_per_description:
+            duration_per_description[description] += duration
+        else:
+            duration_per_description[description] = duration
+
+    duration_per_description_tuples = []
+    for description, total_duration in duration_per_description.items():
+        duration_per_description_tuples.append((description, round(total_duration/3600, 2)))
+    return duration_per_description_tuples

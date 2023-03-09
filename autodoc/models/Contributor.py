@@ -8,13 +8,15 @@ class Contributor:
                      url: str, 
                      user_type: str, 
                      site_admin: bool, 
-                     contributions: int) -> None:
+                     contributions: int,
+                     clockify_id: str) -> None:
                 self.user_id = user_id
                 self.nickname = nickname
                 self.url = url
                 self.user_type = user_type
                 self.site_admin = site_admin
                 self.contributions = contributions
+                self.clockify_id = clockify_id
 
         @staticmethod
         def create(contributor_json: json) -> Contributor:
@@ -29,7 +31,7 @@ class Contributor:
                                    url, 
                                    user_type, 
                                    site_admin, 
-                                   contributions)
+                                   contributions, '')
         
         @staticmethod
         def create_contributors(contributors_json: json) -> List[Contributor]:
