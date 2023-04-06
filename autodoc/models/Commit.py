@@ -18,7 +18,7 @@ class Commit:
     @staticmethod
     def create(commit_json: json) -> Commit:
         sha = commit_json['sha']
-        author = commit_json['author']['login']
+        author = commit_json['commit']['author']['name']
         date = commit_json['commit']['author']['date']
         message = commit_json['commit']['message']
         return Commit(sha, author, date, message)

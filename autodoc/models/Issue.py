@@ -26,6 +26,9 @@ class Issue:
         self.updated_at = updated_at
         self.closed_at = closed_at
 
+    def __str__(self):
+        return f"{self.number}-{self.title}"
+
     @staticmethod
     def create(issue_json: json) -> Issue:
         number = issue_json['number']

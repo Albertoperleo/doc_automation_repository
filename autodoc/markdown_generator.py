@@ -1,25 +1,29 @@
 from typing import List
 import os
+
+from autodoc import Issue
 from autodoc.models import Repository
 
 
-def to_markdown(repository: Repository, templates_path: str, template_name: str) -> None:
-    """Converts files from .txt to .md
+def to_markdown(repository: Repository, workspace: dict, templates_path: str) -> None:
 
-    Args:
-        repository (Repository): repository with data
-        templates_path (str): link to templates dir
-        template_name (str): template selected
-    """
     if not os.path.exists(templates_path) or not os.path.isdir(templates_path):
         raise 'Could not find templates directory!'
-    if not os.path.exists(templates_path + template_name):
-        raise f"Could not find template '{template_name}' in templates directory!"
-    empty_template = read_file(templates_path + template_name)
-    filled_template = fill_base(repository, empty_template)
-    file_path = template_name.replace('.txt', '.md')
-    save_file(templates_path + file_path, filled_template)
 
+    task_template = read_file(templates_path + 'task_template.txt')
+    tasks = []
+    for issue in repository.issues:
+        tasks.append(fill_task(issue, workspace, task_template))
+    print(tasks)
+    # filled_template = fill_base(repository, empty_template)
+    # file_path = template_name.replace('.txt', '.md')
+    # save_file(templates_path + file_path, filled_template)
+
+def fill_task(issue: Issue, workspace: dict, task_template: str) -> str:
+    #TODO
+    print(issue.user)
+    print(workspace.get(issue.user))
+    return ''
 
 def fill_base(repository: Repository, empty_template: list) -> List[str]:
     """Fills the given template
@@ -42,13 +46,11 @@ def fill_base(repository: Repository, empty_template: list) -> List[str]:
 
 
 def read_file(path: str) -> List[str]:
-    """Reads lines from a given file by path
+    """
+    Reads the file at the given path and returns the lines of the file as a list of strings.
 
-    Args:
-        path (str): path to file
-
-    Returns:
-        List[str]: lines from file
+    :param path: The path to the file to read.
+    :return: The lines of the file as a list of strings.
     """
     with open(path, "r") as file:
         empty_template = file.readlines()
@@ -56,11 +58,12 @@ def read_file(path: str) -> List[str]:
 
 
 def save_file(path: str, data: list) -> None:
-    """Saves the given lines into a file
+    """
+    Saves the given data to the given path.
 
-    Args:
-        path (str): path to dst file
-        data (list): lines to save
+    :param path: The path to the file to save the data to.
+    :param data: The data to save to the file.
+    :return: None
     """
     with open(path, "w") as file:
         file.writelines(data)
